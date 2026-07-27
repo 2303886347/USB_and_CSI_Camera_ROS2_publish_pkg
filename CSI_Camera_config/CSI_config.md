@@ -55,7 +55,7 @@ gst-launch-1.0 \
 
 
 
-Jetson-IO 配置工具无法打开时，根据不同的主控利用ai agent去获取主控信息并且修改jetson_io_dtb_fix.sh的内容来修复DTB（）：
+Jetson-IO 配置工具无法打开时，根据不同的主控利用ai agent去获取主控信息并且修改jetson_io_dtb_fix.sh的内容来修复DTB（当前脚本适用环境：Jetson Orin Nano Super、JetPack 6.2、L4T R36.4.3。）：
 
 1. 在 Lite 主控终端中确认当前用户主目录，然后执行脚本。
 2. 在 Lite 主控终端中执行：
