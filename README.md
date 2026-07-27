@@ -1,4 +1,4 @@
-# USB_and_CSI_Camera_ROS2_publish_pkg
+# USB 与 CSI 摄像头 ROS 2 图像发布包
 ROS 2 Humble image publishers for a Jetson CSI camera or a V4L2 USB camera.
 ## 1. 产物和功能
 
@@ -22,9 +22,65 @@ camera_usb_and_csi
 - CSI 和 USB 节点都默认发布 `/image_raw`，可直接连接 `collect_picture`。
 - USB 设备序列号绑定脚本及 udev 规则。
 
-不要同时启动 CSI 和 USB 节点向同一个 `/image_raw` 发布，否则订阅端会收到两个发布者的图像。
+> [!WARNING]
+>
+> **不要同时启动 CSI 和 USB 节点向同一个 `/image_raw` 发布，否则订阅端会收到两个发布者的图像。**
 
-### 新终端必须重新加载 ROS 2 环境
+### 1.1 新终端必须重新加载 ROS 2 环境
+
+`source` 只对当前终端有效。每次新开终端、标签页或 SSH 会话，都要重新执行：
+
+```bash
+source /opt/ros/humble/setup.bash
+source /home/ubuntu/ros2_ws/install/setup.bash
+```
+## 2. 新建 ROS 2 工作空间并引入 Camera_USB_and_CSI
+
+如果目标机器还没有可用的 ROS 2 工作空间，先按本节从零创建，再继续后面的设备绑定与启动步骤。
+
+### 2.1 创建工作空间目录
+
+```bash
+mkdir -p /home/ubuntu/ros2_ws/src
+cd /home/ubuntu/ros2_ws
+```
+
+### 2.2 引入 Camera_USB_and_CSI 源码目录
+
+将 `Camera_USB_and_CSI` 整个目录复制到工作空间 `src` 下（按你的实际源码位置调整左侧路径）：
+
+```bash
+cp -a /home/ubuntu/ros2_ws/src/Camera_USB_and_CSI /home/ubuntu/ros2_ws/src/
+```
+
+如果源码当前就在该位置，也可以跳过复制，直接检查目录是否存在：
+
+```bash
+ls -la /home/ubuntu/ros2_ws/src/Camera_USB_and_CSI
+```
+
+### 2.3 编译功能包
+
+```bash
+cd /home/ubuntu/ros2_ws
+source /opt/ros/humble/setup.bash
+colcon build --symlink-install --packages-select camera_usb_and_csi
+source /home/ubuntu/ros2_ws/install/setup.bash
+```
+
+### 2.4 验证包与可执行节点
+
+```bash
+source /opt/ros/humble/setup.bash
+source /home/ubuntu/ros2_ws/install/setup.bash
+
+ros2 pkg prefix camera_usb_and_csi
+ros2 pkg executables camera_usb_and_csi
+```
+
+若能输出包路径和可执行节点列表，说明工作空间与功能包已就绪。
+
+### 2.5 新终端重新加载环境（必须）
 
 `source` 只对当前终端有效。每次新开终端、标签页或 SSH 会话，都要重新执行：
 
@@ -33,7 +89,18 @@ source /opt/ros/humble/setup.bash
 source /home/ubuntu/ros2_ws/install/setup.bash
 ```
 
-## 2. 设备与绑定参数
+### 2.6（可选）写入 `~/.bashrc` 自动加载
+
+```bash
+echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+echo "source /home/ubuntu/ros2_ws/install/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+```
+
+> [!NOTE]
+>
+> **如果你同时维护多个 ROS 2 工作空间，建议不要都写入 `~/.bashrc`，避免环境相互覆盖。可按项目在终端手动 `source` 对应工作空间。**
+## 3. 设备与绑定参数
 
 部署前必须按第 4 节列出并人工确认 CSI、USB 设备。下表是本功能包验证所使用的设备
 映射；实际 `/dev/videoN` 编号应以目标主机的检查结果为准。
@@ -53,7 +120,7 @@ SERIAL=202404150001
 V4L2 index=0
 ```
 
-## 3. 单独验证 CSI 相机
+### 3.1 单独验证 CSI 相机
 
 测试脚本使用 Ubuntu 提供且支持 GStreamer 的 OpenCV，确保能够打开 Jetson CSI 管线。
 
@@ -342,7 +409,7 @@ source /home/ubuntu/ros2_ws/install/setup.bash
 
 ## 13. 常见问题
 
-### CSI 的 GStreamer 管线打不开
+### 13.1 CSI 的 GStreamer 管线打不开
 
 检查 OpenCV：
 
@@ -358,7 +425,7 @@ python3 -c 'import cv2; print(cv2.__version__, cv2.__file__)'
 export LD_PRELOAD=/lib/aarch64-linux-gnu/libGLdispatch.so.0
 ```
 
-### `/dev/usb_cam` 不存在
+### 13.2 `/dev/usb_cam` 不存在
 
 重新运行绑定脚本，或拔插 USB 摄像头：
 
@@ -367,7 +434,7 @@ bash /home/ubuntu/ros2_ws/src/Camera_USB_and_CSI/scripts/install_usb_camera_rule
   --device /dev/video1
 ```
 
-### USB 管线打不开
+### 13.3 USB 管线打不开
 
 确认没有其他程序占用摄像头：
 
@@ -385,7 +452,7 @@ ros2 launch camera_usb_and_csi camera.launch.py \
   camera_type:=USB usb_device:=/dev/video1
 ```
 
-### rqt_image_view 看不到话题
+### 13.4 rqt_image_view 看不到话题
 
 确认相机节点终端没有报错，然后检查：
 
