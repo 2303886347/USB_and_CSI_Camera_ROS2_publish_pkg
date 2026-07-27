@@ -1,0 +1,2 @@
+# icSpring USB camera, serial 202404150001, capture interface only.
+SUBSYSTEM=="video4linux", KERNEL=="video*", ATTR{index}=="0", ATTRS{idVendor}=="32e6", ATTRS{idProduct}=="9251", ATTRS{serial}=="202404150001", SYMLINK+="usb_cam", GROUP="video", MODE="0660", TAG+="uaccess"
